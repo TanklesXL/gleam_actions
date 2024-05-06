@@ -1,5 +1,7 @@
 name: Test Gleam - Node
+
 description: Test your gleam code on nodeJS
+
 inputs:
   gleam_version:
     description: what gleam version to test against

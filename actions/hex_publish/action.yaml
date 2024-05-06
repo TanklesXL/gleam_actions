@@ -1,6 +1,6 @@
-name: Test Gleam - Erlang
+name: Gleam Publish
 
-description: Test your gleam code on erlang/otp
+description: publish a gleam package to hex.pm
 
 inputs:
   gleam_version:
@@ -15,10 +15,14 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: ./actions/deps_restore
     - uses: erlef/setup-beam@v1
       with:
-        rebar3-version: 3
         otp-version: ${{ inputs.erlang_version }}
+        rebar3-version: 3
         gleam-version: ${{ inputs.gleam_version }}
-    - run: gleam test --target erlang
+    - run: gleam publish -y
+      env:
+        HEXPM_USER: ${{ secrets.HEXPM_USER }}
+        HEXPM_PASS: ${{ secrets.HEXPM_PASS }}
       shell: bash
