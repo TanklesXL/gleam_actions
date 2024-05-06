@@ -1,0 +1,62 @@
+name: Test
+
+on:
+  workflow_call:
+    inputs:
+      gleam_version:
+        required: true
+      erlang_enabled:
+        required: true
+        default: true
+      node_enabled:
+        required: true
+        default: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: TanklesXL/gleam_actions/actions/format@main
+        with:
+          gleam_version: ${{ env.GLEAM_VERSION }}
+
+  deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: TanklesXL/gleam_actions/actions/deps_cache@main
+        with:
+          gleam_version: ${{ env.GLEAM_VERSION }}
+
+  test_erlang:
+    if: inputs.erlang_enabled == true
+    runs-on: ubuntu-latest
+    needs: deps
+    strategy:
+      fail-fast: true
+      matrix:
+        erlang: ["26", "25", "27.0-rc3"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: TanklesXL/gleam_actions/actions/deps_restore@main
+      - uses: TanklesXL/gleam_actions/actions/test_erlang@main
+        with:
+          erlang_version: ${{ matrix.erlang }}
+          gleam_version: ${{ env.GLEAM_VERSION }}
+
+  test_node:
+    if: inputs.node_enabled == true
+    runs-on: ubuntu-latest
+    needs: deps
+    strategy:
+      fail-fast: true
+      matrix:
+        node: ["22", "20", "18"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: TanklesXL/gleam_actions/actions/deps_restore@main
+      - uses: TanklesXL/gleam_actions/actions/test_node@main
+        with:
+          node_version: ${{ matrix.node }}
+          gleam_version: ${{ env.GLEAM_VERSION }}
