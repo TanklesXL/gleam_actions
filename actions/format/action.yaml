@@ -1,0 +1,22 @@
+name: Check Gleam Format
+description: Check that your gleam code is formatted properly
+inputs:
+  gleam_version:
+    description: what gleam version to test against
+    required: true
+    default: "1"
+  erlang_version:
+    description: what erlang/otp version to test against
+    required: true
+    default: "26"
+
+runs:
+  using: composite
+  steps:
+    - uses: erlef/setup-beam@v1
+      with:
+        rebar3-version: 3
+        otp-version: ${{ inputs.erlang_version }}
+        gleam-version: ${{ inputs.gleam_version }}
+    - run: gleam format --check src test
+      shell: bash

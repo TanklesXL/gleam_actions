@@ -1,0 +1,36 @@
+name: Cache Gleam Deps
+description: cache gleam dependencies for faster access later
+
+inputs:
+  gleam_version:
+    description: what gleam version to test against
+    required: true
+    default: "1"
+  erlang_version:
+    description: what erlang/otp version to test against
+    required: true
+    default: "26"
+
+runs:
+  using: composite
+  steps:
+    - name: Check cache
+      uses: actions/cache/restore@v4
+      id: restore
+      with:
+        path: ./build/packages
+        key: deps-${{ hashFiles('manifest.toml') }}
+    - if: steps.restore.outputs.cache-hit != 'true'
+      uses: erlef/setup-beam@v1
+      with:
+        rebar3-version: 3
+        otp-version: ${{ inputs.erlang_version }}
+        gleam-version: ${{ inputs.gleam_version }}
+    - if: steps.restore.outputs.cache-hit != 'true'
+      run: gleam deps download
+      shell: bash
+    - if: steps.restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ./build/packages
+        key: deps-${{ hashFiles('manifest.toml') }}
