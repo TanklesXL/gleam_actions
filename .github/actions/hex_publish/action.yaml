@@ -15,7 +15,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: ./actions/deps_restore
     - uses: erlef/setup-beam@v1
       with:
         otp-version: ${{ inputs.erlang_version }}
