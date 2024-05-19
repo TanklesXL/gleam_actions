@@ -18,7 +18,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - if: ${{ inputs.target == "javascript" && inputs.install_node != "false" }}
+    - if: ${{ inputs.target == 'javascript' && inputs.install_node != 'false' }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node_version }}
