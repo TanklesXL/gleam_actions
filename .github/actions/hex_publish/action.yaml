@@ -11,17 +11,18 @@ inputs:
     description: what erlang/otp version to test against
     required: true
     default: "26"
+  hex_user:
+    description: hex.pm username
+    required: true
+  hex_pass:
+    description: hex.pm username
+    required: true
 
 runs:
   using: composite
   steps:
-    - uses: erlef/setup-beam@v1
-      with:
-        otp-version: ${{ inputs.erlang_version }}
-        rebar3-version: 3
-        gleam-version: ${{ inputs.gleam_version }}
     - run: gleam publish -y
       env:
-        HEXPM_USER: ${{ secrets.HEXPM_USER }}
-        HEXPM_PASS: ${{ secrets.HEXPM_PASS }}
+        HEXPM_USER: ${{ inputs.hex_user }}
+        HEXPM_PASS: ${{ inputs.hex_pass }}
       shell: bash
