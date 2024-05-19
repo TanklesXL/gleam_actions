@@ -55,7 +55,9 @@ jobs:
         with:
           gleam_version: ${{ inputs.gleam_version }}
           erlang_version: ${{ matrix.erlang }}
-      - uses: TanklesXL/gleam_actions/.github/actions/test_erlang@main
+      - uses: TanklesXL/gleam_actions/.github/actions/test@main
+        with:
+          target: "erlang"
 
   test_node:
     if: inputs.test_node
