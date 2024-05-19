@@ -1,14 +1,14 @@
-name: Test Gleam - Erlang
+name: Install gleam and erlang
 
-description: Test your gleam code on erlang/otp
+description: Check that your gleam code is formatted properly
 
 inputs:
   gleam_version:
-    description: what gleam version to test against
+    description: what gleam version to install
     required: true
     default: "1"
   erlang_version:
-    description: what erlang/otp version to test against
+    description: what erlang/otp version to install
     required: true
     default: "26"
 
@@ -20,5 +20,3 @@ runs:
         rebar3-version: 3
         otp-version: ${{ inputs.erlang_version }}
         gleam-version: ${{ inputs.gleam_version }}
-    - run: gleam test --target erlang
-      shell: bash

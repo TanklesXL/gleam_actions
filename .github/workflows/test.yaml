@@ -6,30 +6,42 @@ on:
       gleam_version:
         type: string
         required: true
-      erlang_enabled:
+        default: "1"
+      test_erlang:
         type: boolean
-      node_enabled:
+        default: true
+      erlang_version:
+        type: string
+        default: "26"
+      test_node:
         type: boolean
+        default: true
 
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: TanklesXL/gleam_actions/.github/actions/format@main
+      - uses: TanklesXL/gleam_actions/.github/actions/install_gleam@main
         with:
-          gleam_version: ${{ inputs.gleam_version }}
+          gleam_version: ${{inputs.gleam_version}}
+          erlang_version: ${{inputs.erlang_version}}
+      - uses: TanklesXL/gleam_actions/.github/actions/format@main
 
   deps:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: TanklesXL/gleam_actions/.github/actions/install_gleam@main
+        with:
+          gleam_version: ${{ inputs.gleam_version }}
+          erlang_version: ${{ inputs.erlang_version }}
       - uses: TanklesXL/gleam_actions/.github/actions/deps_cache@main
         with:
           gleam_version: ${{ inputs.gleam_version }}
 
   test_erlang:
-    if: inputs.erlang_enabled
+    if: inputs.test_erlang
     runs-on: ubuntu-latest
     needs: deps
     strategy:
@@ -39,13 +51,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: TanklesXL/gleam_actions/.github/actions/deps_restore@main
-      - uses: TanklesXL/gleam_actions/.github/actions/test_erlang@main
+      - uses: TanklesXL/gleam_actions/.github/actions/install_gleam@main
         with:
-          erlang_version: ${{ matrix.erlang }}
           gleam_version: ${{ inputs.gleam_version }}
+          erlang_version: ${{ matrix.erlang }}
+      - uses: TanklesXL/gleam_actions/.github/actions/test_erlang@main
 
   test_node:
-    if: inputs.node_enabled
+    if: inputs.test_node
     runs-on: ubuntu-latest
     needs: deps
     strategy:
@@ -55,7 +68,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: TanklesXL/gleam_actions/.github/actions/deps_restore@main
-      - uses: TanklesXL/gleam_actions/.github/actions/test_node@main
+      - uses: TanklesXL/gleam_actions/.github/actions/install_gleam@main
         with:
-          node_version: ${{ matrix.node }}
           gleam_version: ${{ inputs.gleam_version }}
+          erlang_version: ${{ inputs.erlang_version }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: TanklesXL/gleam_actions/.github/actions/test@main
+        with:
+          target: "javascript"
+          install_node: "true"
+          node_version: ${{ matrix.node }}
