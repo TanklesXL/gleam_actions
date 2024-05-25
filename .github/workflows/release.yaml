@@ -11,6 +11,12 @@ on:
         type: string
         required: true
         default: "26"
+      test_erlang:
+        type: boolean
+        default: true
+      test_node:
+        type: boolean
+        default: true
     secrets:
       HEXPM_USER:
         description: hex.pm username
@@ -20,6 +26,14 @@ on:
         required: false
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yaml
+    with:
+      erlang_version: ${{inputs.erlang_version}}
+      gleam_version: ${{inputs.gleam_version}}
+      test_erlang: ${{inputs.test_erlang}}
+      test_node: ${{inputs.test_node}}
+
   version:
     runs-on: ubuntu-latest
     steps:
