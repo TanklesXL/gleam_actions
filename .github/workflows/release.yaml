@@ -54,7 +54,6 @@ jobs:
     needs:
       - test
       - version
-      - deps
     steps:
       - name: Checkout
         uses: actions/checkout@v4
