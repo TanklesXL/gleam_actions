@@ -12,12 +12,12 @@ on:
         required: true
         default: "26"
     secrets:
-      hexpm_user:
+      HEXPM_USER:
         description: hex.pm username
-        required: true
-      hexpm_pass:
+        required: false
+      HEXPM_PASS:
         description: hex.pm password
-        required: true
+        required: false
 
 jobs:
   test:
@@ -66,5 +66,5 @@ jobs:
           gleam_version: ${{ inputs.gleam_version }}
       - uses: TanklesXL/gleam_actions/.github/actions/hex_publish@main
         with:
-          hex_user: ${{ secrets.hexpm_user }}
-          hex_pass: ${{ secrets.hexpm_pass }}
+          hex_user: ${{ secrets.HEXPM_USER }}
+          hex_pass: ${{ secrets.HEXPM_PASS }}
