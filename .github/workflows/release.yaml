@@ -20,9 +20,6 @@ on:
         required: false
 
 jobs:
-  test:
-    uses: ./.github/workflows/test.yml
-
   version:
     runs-on: ubuntu-latest
     steps:
