@@ -63,7 +63,6 @@ jobs:
 
   release-hex:
     runs-on: ubuntu-latest
-    environment: publish
     needs:
       - test
       - version
