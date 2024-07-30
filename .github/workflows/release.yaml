@@ -24,6 +24,9 @@ on:
       HEXPM_PASS:
         description: hex.pm password
         required: false
+      HEXPM_API_KEY:
+        description: hex.pm API key
+        required: false
 
 jobs:
   test:
@@ -77,3 +80,4 @@ jobs:
         with:
           hex_user: ${{ secrets.HEXPM_USER }}
           hex_pass: ${{ secrets.HEXPM_PASS }}
+          hex_key: ${{ secrets.HEXPM_API_KEY }}

@@ -13,10 +13,13 @@ inputs:
     default: "26"
   hex_user:
     description: hex.pm username
-    required: true
+    required: false
   hex_pass:
     description: hex.pm username
-    required: true
+    required: false
+  hex_key:
+    description: hex.pm API key
+    required: false
 
 runs:
   using: composite
@@ -25,4 +28,5 @@ runs:
       env:
         HEXPM_USER: ${{ inputs.hex_user }}
         HEXPM_PASS: ${{ inputs.hex_pass }}
+        HEXPM_API_KEY: ${{ inputs.hex_key }}
       shell: bash
