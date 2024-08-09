@@ -48,11 +48,11 @@ jobs:
         erlang: ["26", "27"]
     steps:
       - uses: actions/checkout@v4
-      - uses: TanklesXL/gleam_actions/.github/actions/deps_restore@main
       - uses: TanklesXL/gleam_actions/.github/actions/install_gleam@main
         with:
           gleam_version: ${{ inputs.gleam_version }}
           erlang_version: ${{ matrix.erlang }}
+      - uses: TanklesXL/gleam_actions/.github/actions/deps_cache@main
       - uses: TanklesXL/gleam_actions/.github/actions/test@main
         with:
           target: "erlang"
@@ -67,11 +67,11 @@ jobs:
         node: ["22", "20", "18"]
     steps:
       - uses: actions/checkout@v4
-      - uses: TanklesXL/gleam_actions/.github/actions/deps_restore@main
       - uses: TanklesXL/gleam_actions/.github/actions/install_gleam@main
         with:
           gleam_version: ${{ inputs.gleam_version }}
           erlang_version: ${{ inputs.erlang_version }}
+      - uses: TanklesXL/gleam_actions/.github/actions/deps_cache@main
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}

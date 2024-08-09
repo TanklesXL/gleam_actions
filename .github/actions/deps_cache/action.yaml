@@ -1,4 +1,4 @@
-name: Cache Gleam Deps
+name: Cache and restore Gleam Deps
 
 description: cache gleam dependencies for faster access later
 
