@@ -37,8 +37,6 @@ jobs:
           gleam_version: ${{ inputs.gleam_version }}
           erlang_version: ${{ inputs.erlang_version }}
       - uses: TanklesXL/gleam_actions/.github/actions/deps_cache@main
-        with:
-          gleam_version: ${{ inputs.gleam_version }}
 
   test_erlang:
     if: inputs.test_erlang
