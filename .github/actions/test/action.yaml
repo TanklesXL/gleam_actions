@@ -6,21 +6,37 @@ inputs:
   target:
     description: target to test (erlang or javascript)
     required: true
-  install_node:
-    description: whether or not to install nodeJS (only necessary if target is javascript)
-    required: false
-    default: "false"
   node_version:
-    description: what nodeJS version to test against (only used if install_node is
+    description: what node version to test against
     required: false
-    default: "20"
+    default: ""
+  deno_version:
+    description: what deno version to test against
+    required: false
+    default: ""
 
 runs:
   using: composite
   steps:
-    - if: ${{ inputs.target == 'javascript' && inputs.install_node != 'false' }}
+    # test erlang
+    - if: ${{ inputs.target == 'erlang' }}
+      run: gleam test --target erlang
+      shell: bash
+
+    # test node
+    - if: ${{ inputs.target == 'javascript' && inputs.node_version != "" }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node_version }}
-    - run: gleam test --target ${{ inputs.target }}
+    - if: ${{ inputs.target == 'javascript' && inputs.node_version != "" }}
+      run: gleam test --target ${{ inputs.target }} --runtime nodejs
+      shell: bash
+
+    # test deno
+    - if: ${{ inputs.target == 'javascript' && inputs.deno_version != "" }}
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: ${{ inputs.deno_version }}
+    - if: ${{ inputs.target == 'javascript' && inputs.deno_version != "" }}
+      run: gleam test --target ${{ inputs.target }} --runtime nodejs
       shell: bash
