@@ -18,12 +18,6 @@ on:
         type: boolean
         default: true
     secrets:
-      HEXPM_USER:
-        description: hex.pm username
-        required: false
-      HEXPM_PASS:
-        description: hex.pm password
-        required: false
       HEXPM_API_KEY:
         description: hex.pm API key
         required: false
@@ -77,6 +71,4 @@ jobs:
       - uses: TanklesXL/gleam_actions/.github/actions/deps_cache@main
       - uses: TanklesXL/gleam_actions/.github/actions/hex_publish@main
         with:
-          hex_user: ${{ secrets.HEXPM_USER }}
-          hex_pass: ${{ secrets.HEXPM_PASS }}
           hex_key: ${{ secrets.HEXPM_API_KEY }}

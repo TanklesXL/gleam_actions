@@ -11,12 +11,6 @@ inputs:
     description: what erlang/otp version to test against
     required: true
     default: "26"
-  hex_user:
-    description: hex.pm username
-    required: false
-  hex_pass:
-    description: hex.pm username
-    required: false
   hex_key:
     description: hex.pm API key
     required: false
@@ -26,7 +20,5 @@ runs:
   steps:
     - run: gleam publish -y
       env:
-        HEXPM_USER: ${{ inputs.hex_user }}
-        HEXPM_PASS: ${{ inputs.hex_pass }}
         HEXPM_API_KEY: ${{ inputs.hex_key }}
       shell: bash
