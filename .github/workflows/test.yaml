@@ -12,7 +12,7 @@ on:
         default: true
       erlang_version:
         type: string
-        default: "26"
+        default: "28"
       test_node:
         type: boolean
         default: true
