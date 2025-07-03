@@ -10,7 +10,7 @@ inputs:
   erlang_version:
     description: what erlang/otp version to install
     required: true
-    default: "26"
+    default: "28"
 
 runs:
   using: composite
