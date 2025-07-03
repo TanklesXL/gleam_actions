@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        erlang: ["26", "27"]
+        erlang: ["28", "27"]
     steps:
       - uses: actions/checkout@v4
       - uses: TanklesXL/gleam_actions/.github/actions/install_gleam@main
