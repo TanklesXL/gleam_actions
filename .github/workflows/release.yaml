@@ -10,7 +10,7 @@ on:
       erlang_version:
         type: string
         required: true
-        default: "26"
+        default: "28"
       test_erlang:
         type: boolean
         default: true
