@@ -37,17 +37,20 @@ jobs:
       - id: keys
         run: |
           echo "key=deps-${{ hashFiles( format('{0}/{1}', inputs.working-directory, 'manifest.toml' ) ) }}" >> $GITHUB_OUTPUT
-          echo "path=./${{ inputs.working-directory }}/build/packages" >> $GITHUB_OUTPUT
+          echo "path=${{ inputs.working-directory }}/build/packages" >> $GITHUB_OUTPUT
       - uses: actions/cache@v5
         id: cache
         with:
           key: ${{ steps.keys.outputs.key }}
           path: ${{ steps.keys.outputs.path }}
           lookup-only: true
-      - uses: erlef/setup-beam@v1
+      - if: steps.cache.outputs.cache-hit == false
+        uses: erlef/setup-beam@v1
         with:
+          otp-version: latest
+          rebar3-version: latest
           gleam-version: ${{ inputs.gleam-version }}
-      - if: steps.cache.outputs.cache-hit
+      - if: steps.cache.outputs.cache-hit == false
         working-directory: ${{ inputs.working-directory }}
         run: gleam deps download
     outputs:
@@ -63,7 +66,7 @@ jobs:
       - id: keys
         run: |
           echo "key=build-cache-${{ inputs.working-directory }}-${{ inputs.target }}" >> $GITHUB_OUTPUT
-          echo "path=./${{ inputs.working-directory }}/build/dev" >> $GITHUB_OUTPUT
+          echo "path=${{ inputs.working-directory }}/build/dev" >> $GITHUB_OUTPUT
       - uses: actions/cache/restore@v5
         with:
           key: ${{ needs.deps.outputs.key }}
@@ -73,8 +76,6 @@ jobs:
         with:
           key: ${{ steps.keys.outputs.key }}
           path: ${{ steps.keys.outputs.path }}
-      - run: gleam build --target ${{ inputs.target }}
-        working-directory: ${{ inputs.working-directory }}
       - if: inputs.target == 'erlang'
         uses: erlef/setup-beam@v1
         with:
@@ -91,6 +92,8 @@ jobs:
           gleam-version: ${{ inputs.gleam-version }}
           otp-version: latest
           rebar3-version: latest
+      - run: gleam build --target ${{ inputs.target }}
+        working-directory: ${{ inputs.working-directory }}
       - if: github.ref_name == github.event.repository.default_branch
         uses: actions/cache/save@v5
         with:
@@ -140,5 +143,21 @@ jobs:
       - deps
     steps:
       - uses: actions/checkout@v5
+      - if: inputs.target == 'erlang'
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ inputs.target-version }}
+          gleam-version: ${{ inputs.gleam-version }}
+          rebar3-version: 3
+      - if: inputs.target == 'javascript'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.target-version }}
+      - if: inputs.target == 'javascript'
+        uses: erlef/setup-beam@v1
+        with:
+          gleam-version: ${{ inputs.gleam-version }}
+          otp-version: latest
+          rebar3-version: latest
       - working-directory: ${{ inputs.working-directory }}
         run: gleam format --check
