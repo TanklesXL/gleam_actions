@@ -1,0 +1,165 @@
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: which directory to run this workflow in, useful for monorepo setups where a project may have multiple gleam projects, or have a gleam project in a subdirectory
+        type: string
+        required: false
+        default: .
+      target:
+        type: string
+        description: which target to build and test against
+        required: true
+      target-version:
+        type: string
+        description: which version of the target to build and test against
+        required: true
+      gleam-version:
+        type: string
+        description: which version of gleam to build and test against
+        required: false
+        default: latest
+      runs-on:
+        type: string
+        description: GitHub actions runner to use for jobs
+        required: false
+        default: ubuntu-latest
+
+jobs:
+  deps:
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: keys
+        run: |
+          echo "key=deps-${{ hashFiles( format('{0}/{1}', inputs.working-directory, 'manifest.toml' ) ) }}" >> $GITHUB_OUTPUT
+          echo "path=${{ inputs.working-directory }}/build/packages" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v5
+        id: cache
+        with:
+          key: ${{ steps.keys.outputs.key }}
+          path: ${{ steps.keys.outputs.path }}
+          lookup-only: true
+      - if: steps.cache.outputs.cache-hit == false
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: latest
+          rebar3-version: latest
+          gleam-version: ${{ inputs.gleam-version }}
+      - if: steps.cache.outputs.cache-hit == false
+        working-directory: ${{ inputs.working-directory }}
+        run: gleam deps download
+    outputs:
+      key: ${{ steps.keys.outputs.key }}
+      path: ${{ steps.keys.outputs.path }}
+
+  build:
+    runs-on: ${{ inputs.runs-on }}
+    needs:
+      - deps
+    steps:
+      - uses: actions/checkout@v5
+      - id: keys
+        run: |
+          echo "key=build-cache-${{ inputs.working-directory }}-${{ inputs.target }}" >> $GITHUB_OUTPUT
+          echo "path=${{ inputs.working-directory }}/build/dev" >> $GITHUB_OUTPUT
+      - uses: actions/cache/restore@v5
+        with:
+          key: ${{ needs.deps.outputs.key }}
+          path: ${{ needs.deps.outputs.path }}
+      - uses: actions/cache/restore@v5
+        id: build-cache
+        with:
+          key: ${{ steps.keys.outputs.key }}
+          path: ${{ steps.keys.outputs.path }}
+      - if: inputs.target == 'erlang'
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ inputs.target-version }}
+          gleam-version: ${{ inputs.gleam-version }}
+          rebar3-version: 3
+      - if: inputs.target == 'javascript'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.target-version }}
+      - if: inputs.target == 'javascript'
+        uses: erlef/setup-beam@v1
+        with:
+          gleam-version: ${{ inputs.gleam-version }}
+          otp-version: latest
+          rebar3-version: latest
+      - run: gleam build --target ${{ inputs.target }}
+        working-directory: ${{ inputs.working-directory }}
+      - if: github.ref_name == github.event.repository.default_branch
+        uses: actions/cache/save@v5
+        with:
+          key: ${{ steps.keys.outputs.key }}
+          path: ${{ steps.keys.outputs.path }}
+    outputs:
+      key: ${{ steps.keys.outputs.key }}
+      path: ${{ steps.keys.outputs.path }}
+
+  test:
+    runs-on: ${{ inputs.runs-on }}
+    needs:
+      - deps
+      - build
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v5
+        with:
+          key: ${{ needs.deps.outputs.key }}
+          path: ${{ needs.deps.outputs.path }}
+      - uses: actions/cache/restore@v5
+        with:
+          key: ${{ needs.build.outputs.key }}
+          path: ${{ needs.build.outputs.path }}
+      - if: inputs.target == 'erlang'
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ inputs.target-version }}
+          gleam-version: ${{ inputs.gleam-version }}
+          rebar3-version: 3
+      - if: inputs.target == 'javascript'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.target-version }}
+      - if: inputs.target == 'javascript'
+        uses: erlef/setup-beam@v1
+        with:
+          gleam-version: ${{ inputs.gleam-version }}
+          otp-version: latest
+          rebar3-version: latest
+      - working-directory: ${{ inputs.working-directory }}
+        run: gleam test --target ${{ inputs.target }}
+
+  format:
+    runs-on: ${{ inputs.runs-on }}
+    needs:
+      - deps
+    steps:
+      - uses: actions/checkout@v5
+      - if: inputs.target == 'erlang'
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ inputs.target-version }}
+          gleam-version: ${{ inputs.gleam-version }}
+          rebar3-version: 3
+      - if: inputs.target == 'javascript'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.target-version }}
+      - if: inputs.target == 'javascript'
+        uses: erlef/setup-beam@v1
+        with:
+          gleam-version: ${{ inputs.gleam-version }}
+          otp-version: latest
+          rebar3-version: latest
+      - working-directory: ${{ inputs.working-directory }}
+        run:
+          DEV_DIR=$(test -d dev & echo "dev" || echo "")
+          gleam format --check src test $DEV_DIR
