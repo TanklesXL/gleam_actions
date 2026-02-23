@@ -37,7 +37,7 @@ jobs:
       - id: keys
         run: |
           echo "key=deps-${{ hashFiles( format('{0}/{1}', inputs.working-directory, 'manifest.toml' ) ) }}" >> $GITHUB_OUTPUT
-          echo "path=./${{ inputs.working-directory }}/build/packages"
+          echo "path=./${{ inputs.working-directory }}/build/packages" >> $GITHUB_OUTPUT
       - uses: actions/cache@v5
         id: cache
         with:
@@ -89,6 +89,8 @@ jobs:
         uses: erlef/setup-beam@v1
         with:
           gleam-version: ${{ inputs.gleam-version }}
+          otp-version: latest
+          rebar3-version: latest
       - if: github.ref_name == github.event.repository.default_branch
         uses: actions/cache/save@v5
         with:
@@ -127,6 +129,8 @@ jobs:
         uses: erlef/setup-beam@v1
         with:
           gleam-version: ${{ inputs.gleam-version }}
+          otp-version: latest
+          rebar3-version: latest
       - working-directory: ${{ inputs.working-directory }}
         run: gleam test --target ${{ inputs.target }}
 
