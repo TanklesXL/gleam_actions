@@ -160,4 +160,6 @@ jobs:
           otp-version: latest
           rebar3-version: latest
       - working-directory: ${{ inputs.working-directory }}
-        run: gleam format --check
+        run:
+          DEV_DIR=$(test -d dev & echo "dev" || echo "")
+          gleam format --check src test $DEV_DIR
